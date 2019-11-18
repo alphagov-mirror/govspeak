@@ -34,9 +34,7 @@ module Govspeak
       lines = []
       lines << '<figcaption>'
       lines << %(<p>#{caption}</p>) if caption.present?
-      if credit.present?
-        lines << %(<p>#{I18n.t('govspeak.image.figure.credit', credit: credit)}</p>)
-      end
+      lines << %(<p>#{I18n.t('govspeak.image.figure.credit', credit: credit)}</p>) if credit.present?
       lines << '</figcaption>'
       lines.join
     end

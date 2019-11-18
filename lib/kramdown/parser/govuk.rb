@@ -32,9 +32,7 @@ module Kramdown
         if element.type == :a
           begin
             host = Addressable::URI.parse(href).host
-            unless host.nil? || @document_domains.compact.include?(host)
-              element.attr['rel'] = 'external'
-            end
+            element.attr['rel'] = 'external' unless host.nil? || @document_domains.compact.include?(host)
           # rubocop:disable Lint/HandleExceptions
           rescue Addressable::URI::InvalidURIError
             # it's safe to ignore these very *specific* exceptions
