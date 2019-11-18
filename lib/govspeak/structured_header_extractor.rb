@@ -10,7 +10,7 @@ module Govspeak
 
     def to_h
       Hash[members.zip(values)].merge(
-        headers: headers.map(&:to_h),
+        headers: headers.map(&:to_h)
       )
     end
   end
@@ -48,9 +48,9 @@ module Govspeak
     private :doc, :stack, :structured_headers
 
     def headers_list
-      @headers_list ||= doc.headers.map { |h|
+      @headers_list ||= doc.headers.map do |h|
         StructuredHeader.new(h.text, h.level, h.id, [])
-      }
+      end
     end
 
     def add_top_level(header)

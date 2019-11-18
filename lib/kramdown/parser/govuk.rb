@@ -1,5 +1,5 @@
-require "addressable/uri"
-require "kramdown/options"
+require 'addressable/uri'
+require 'kramdown/options'
 
 module Kramdown
   module Options
@@ -9,7 +9,7 @@ module Kramdown
       end
     end
 
-    define(:document_domains, Object, %w{www.gov.uk}, <<~DESCRIPTION) do |val|
+    define(:document_domains, Object, %w[www.gov.uk], <<~DESCRIPTION) do |val|
       Defines the domains which are considered local to the document
 
       Default: www.gov.uk
@@ -21,10 +21,10 @@ module Kramdown
 
   module Parser
     class Govuk < Kramdown::Parser::Kramdown
-      CUSTOM_INLINE_ELEMENTS = %w(govspeak-embed-attachment-link).freeze
+      CUSTOM_INLINE_ELEMENTS = %w[govspeak-embed-attachment-link].freeze
 
       def initialize(source, options)
-        @document_domains = options[:document_domains] || %w(www.gov.uk)
+        @document_domains = options[:document_domains] || %w[www.gov.uk]
         super
       end
 

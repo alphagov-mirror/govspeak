@@ -17,7 +17,7 @@ module Govspeak
       headers.flatten.compact
     end
 
-  private
+    private
 
     def id(element)
       element.attr.fetch('id', generate_id(element.options[:raw_text]))

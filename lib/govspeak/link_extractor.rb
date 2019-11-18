@@ -9,14 +9,14 @@ module Govspeak
       @call ||= extract_links
     end
 
-  private
+    private
 
     attr_reader :document, :website_root
 
     def extract_links
-      document_anchors.
-        map { |link| extract_href_from_link(link) }.
-        reject(&:blank?)
+      document_anchors
+        .map { |link| extract_href_from_link(link) }
+        .reject(&:blank?)
     end
 
     def extract_href_from_link(link)
@@ -34,7 +34,7 @@ module Govspeak
 
     def processed_govspeak
       doc = Nokogiri::HTML::Document.new
-      doc.encoding = "UTF-8"
+      doc.encoding = 'UTF-8'
 
       doc.fragment(document.to_html)
     end

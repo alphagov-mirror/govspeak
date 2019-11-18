@@ -1,4 +1,4 @@
-require "test_helper"
+require 'test_helper'
 
 class GovspeakLinkExtractorTest < Minitest::Test
   def document_body
@@ -39,30 +39,30 @@ class GovspeakLinkExtractorTest < Minitest::Test
     doc.extracted_links
   end
 
-  test "Links are extracted from the body" do
-    expected_links = %w{http://www.example.com http://www.gov.com /cais-trwydded-yrru-dros-dro http://www.example.com/from/html}
+  test 'Links are extracted from the body' do
+    expected_links = %w[http://www.example.com http://www.gov.com /cais-trwydded-yrru-dros-dro http://www.example.com/from/html]
     assert_equal expected_links, links
   end
 
-  test "Other content is not extracted from the body" do
+  test 'Other content is not extracted from the body' do
     refute_includes %w[Heading], links
   end
 
-  test "Links are not extracted if they begin with #" do
-    refute_includes ["#somepage"], links
+  test 'Links are not extracted if they begin with #' do
+    refute_includes ['#somepage'], links
   end
 
-  test "Links are not extracted if they begin with mailto:" do
-    refute_includes ["mailto:someone@www.example.com"], links
+  test 'Links are not extracted if they begin with mailto:' do
+    refute_includes ['mailto:someone@www.example.com'], links
   end
 
-  test "Links are not extracted if they are blank" do
-    refute_includes [""], links
+  test 'Links are not extracted if they are blank' do
+    refute_includes [''], links
     refute_includes [nil], links
   end
 
-  test "Absolute links are transformed to a url when website_root passed in" do
-    urls = doc.extracted_links(website_root: "http://www.example.com")
-    assert urls.include?("http://www.example.com/cais-trwydded-yrru-dros-dro")
+  test 'Absolute links are transformed to a url when website_root passed in' do
+    urls = doc.extracted_links(website_root: 'http://www.example.com')
+    assert urls.include?('http://www.example.com/cais-trwydded-yrru-dros-dro')
   end
 end

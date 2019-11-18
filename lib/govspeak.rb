@@ -31,7 +31,7 @@ module Govspeak
 
   class Document
     Parser = Kramdown::Parser::Govuk
-    PARSER_CLASS_NAME = Parser.name.split("::").last
+    PARSER_CLASS_NAME = Parser.name.split('::').last
     UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.freeze
     NEW_PARAGRAPH_LOOKBEHIND = %q{(?<=\A|\n\n|\r\n\r\n)}.freeze
 
@@ -50,13 +50,13 @@ module Govspeak
 
     def initialize(source, options = {})
       options = options.dup.deep_symbolize_keys
-      @source = source ? source.dup : ""
+      @source = source ? source.dup : ''
 
       @images = options.delete(:images) || []
       @attachments = Array.wrap(options.delete(:attachments))
       @links = Array.wrap(options.delete(:links))
       @contacts = Array.wrap(options.delete(:contacts))
-      @locale = options.fetch(:locale, "en")
+      @locale = options.fetch(:locale, 'en')
       @options = { input: PARSER_CLASS_NAME, sanitize: true }.merge(options)
       @options[:entity_output] = :symbolic
     end
@@ -78,7 +78,7 @@ module Govspeak
     end
 
     def to_text
-      HTMLEntities.new.decode(to_html.gsub(/(?:<[^>]+>|\s)+/, " ").strip)
+      HTMLEntities.new.decode(to_html.gsub(/(?:<[^>]+>|\s)+/, ' ').strip)
     end
 
     def valid?(validation_options = {})
@@ -98,7 +98,7 @@ module Govspeak
     end
 
     def extract_contact_content_ids
-      _, regex = self.class.extensions.find { |(title)| title == "Contact" }
+      _, regex = self.class.extensions.find { |(title)| title == 'Contact' }
       return [] unless regex
 
       @source.scan(regex).map(&:first).uniq.select { |id| id.match(UUID_REGEX) }
@@ -108,9 +108,9 @@ module Govspeak
       source = Govspeak::BlockquoteExtraQuoteRemover.remove(source)
       source = remove_forbidden_characters(source)
       self.class.extensions.each do |_, regexp, block|
-        source.gsub!(regexp) {
+        source.gsub!(regexp) do
           instance_exec(*Regexp.last_match.captures, &block)
-        }
+        end
       end
       source
     end
@@ -127,24 +127,24 @@ module Govspeak
     end
 
     def self.surrounded_by(open, close = nil)
-      open = Regexp::escape(open)
+      open = Regexp.escape(open)
       if close
-        close = Regexp::escape(close)
-        %r+(?:\r|\n|^)#{open}(.*?)#{close} *(\r|\n|$)?+m
+        close = Regexp.escape(close)
+        /(?:\r|\n|^)#{open}(.*?)#{close} *(\r|\n|$)?/m
       else
-        %r+(?:\r|\n|^)#{open}(.*?)#{open}? *(\r|\n|$)+m
+        /(?:\r|\n|^)#{open}(.*?)#{open}? *(\r|\n|$)/m
       end
     end
 
     def self.wrap_with_div(class_name, character, parser = Kramdown::Document)
-      extension(class_name, surrounded_by(character)) { |body|
+      extension(class_name, surrounded_by(character)) do |body|
         content = parser ? parser.new("#{body.strip}\n").to_html : body.strip
-        %{\n<div class="#{class_name}">\n#{content}</div>\n}
-      }
+        %(\n<div class="#{class_name}">\n#{content}</div>\n)
+      end
     end
 
     def insert_strong_inside_p(body, parser = Govspeak::Document)
-      parser.new(body.strip).to_html.sub(/^<p>(.*)<\/p>$/, "<p><strong>\\1</strong></p>")
+      parser.new(body.strip).to_html.sub(%r{^<p>(.*)</p>$}, '<p><strong>\\1</strong></p>')
     end
 
     extension('button', %r{
@@ -160,11 +160,11 @@ module Govspeak
         \s*  # any whitespace between opening bracket and link
       {\/button} # match ending bracket
       (?:\r|\n|$) # non-capturing match to make sure end of line and linebreak
-    }x) { |attributes, text, href|
-      button_classes = "button"
-      button_classes << " button-start" if attributes =~ /start/
+    }x) do |attributes, text, href|
+      button_classes = 'button'
+      button_classes << ' button-start' if attributes =~ /start/
       /cross-domain-tracking:(?<cross_domain_tracking>.[^\s*]+)/ =~ attributes
-      data_attribute = ""
+      data_attribute = ''
       if cross_domain_tracking
         data_attribute << " data-module='cross-domain-tracking'"
         data_attribute << " data-tracking-code='#{cross_domain_tracking.strip}'"
@@ -173,36 +173,36 @@ module Govspeak
       text = text.strip
       href = href.strip
 
-      %{\n<a role="button" class="#{button_classes}" href="#{href}" #{data_attribute}>#{text}</a>\n}
-    }
+      %(\n<a role="button" class="#{button_classes}" href="#{href}" #{data_attribute}>#{text}</a>\n)
+    end
 
-    extension('highlight-answer') { |body|
-      %{\n\n<div class="highlight-answer">
-#{Govspeak::Document.new(body.strip).to_html}</div>\n}
-    }
+    extension('highlight-answer') do |body|
+      %(\n\n<div class="highlight-answer">
+#{Govspeak::Document.new(body.strip).to_html}</div>\n)
+    end
 
-    extension('stat-headline', %r${stat-headline}(.*?){/stat-headline}$m) { |body|
-      %{\n\n<aside class="stat-headline">
-#{Govspeak::Document.new(body.strip).to_html}</aside>\n}
-    }
+    extension('stat-headline', %r${stat-headline}(.*?){/stat-headline}$m) do |body|
+      %(\n\n<aside class="stat-headline">
+#{Govspeak::Document.new(body.strip).to_html}</aside>\n)
+    end
 
     # FIXME: these surrounded_by arguments look dodgy
-    extension('external', surrounded_by("x[", ")x")) { |body|
+    extension('external', surrounded_by('x[', ')x')) do |body|
       Kramdown::Document.new("[#{body.strip}){:rel='external'}").to_html
-    }
+    end
 
-    extension('informational', surrounded_by("^")) { |body|
-      %{\n\n<div role="note" aria-label="Information" class="application-notice info-notice">
-#{Govspeak::Document.new(body.strip).to_html}</div>\n}
-    }
+    extension('informational', surrounded_by('^')) do |body|
+      %(\n\n<div role="note" aria-label="Information" class="application-notice info-notice">
+#{Govspeak::Document.new(body.strip).to_html}</div>\n)
+    end
 
-    extension('important', surrounded_by("@")) { |body|
-      %{\n\n<div role="note" aria-label="Important" class="advisory">#{insert_strong_inside_p(body)}</div>\n}
-    }
+    extension('important', surrounded_by('@')) do |body|
+      %(\n\n<div role="note" aria-label="Important" class="advisory">#{insert_strong_inside_p(body)}</div>\n)
+    end
 
-    extension('helpful', surrounded_by("%")) { |body|
-      %{\n\n<div role="note" aria-label="Warning" class="application-notice help-notice">\n#{Govspeak::Document.new(body.strip).to_html}</div>\n}
-    }
+    extension('helpful', surrounded_by('%')) do |body|
+      %(\n\n<div role="note" aria-label="Warning" class="application-notice help-notice">\n#{Govspeak::Document.new(body.strip).to_html}</div>\n)
+    end
 
     extension('barchart', /{barchart(.*?)}/) do |captures|
       stacked = '.mc-stacked' if captures.include? 'stacked'
@@ -210,19 +210,19 @@ module Govspeak
       negative = '.mc-negative' if captures.include? 'negative'
 
       [
-       '{:',
-       '.js-barchart-table',
-       stacked,
-       compact,
-       negative,
-       '.mc-auto-outdent',
-       '}'
+        '{:',
+        '.js-barchart-table',
+        stacked,
+        compact,
+        negative,
+        '.mc-auto-outdent',
+        '}'
       ].join(' ')
     end
 
     extension('attached-image', /^!!([0-9]+)/) do |image_number|
       image = images[image_number.to_i - 1]
-      next "" unless image
+      next '' unless image
 
       render_image(ImagePresenter.new(image))
     end
@@ -230,22 +230,22 @@ module Govspeak
     # DEPRECATED: use 'AttachmentLink:attachment-id' instead
     extension('embed attachment inline', /\[embed:attachments:inline:\s*(.*?)\s*\]/) do |content_id|
       attachment = attachments.detect { |a| a[:content_id] == content_id }
-      next "" unless attachment
+      next '' unless attachment
 
       attachment = AttachmentPresenter.new(attachment)
 
-      span_id = attachment.id ? %{ id="attachment_#{attachment.id}"} : ""
+      span_id = attachment.id ? %( id="attachment_#{attachment.id}") : ''
       # new lines inside our title cause problems with govspeak rendering as this is expected to be on one line.
-      title = (attachment.title || "").tr("\n", " ")
+      title = (attachment.title || '').tr("\n", ' ')
       link = attachment.link(title, attachment.url)
-      attributes = attachment.attachment_attributes.empty? ? "" : " (#{attachment.attachment_attributes})"
-      %{<span#{span_id} class="attachment-inline">#{link}#{attributes}</span>}
+      attributes = attachment.attachment_attributes.empty? ? '' : " (#{attachment.attachment_attributes})"
+      %(<span#{span_id} class="attachment-inline">#{link}#{attributes}</span>)
     end
 
     # DEPRECATED: use 'Image:image-id' instead
     extension('attachment image', /\[embed:attachments:image:\s*(.*?)\s*\]/) do |content_id|
       attachment = attachments.detect { |a| a[:content_id] == content_id }
-      next "" unless attachment
+      next '' unless attachment
 
       render_image(AttachmentImagePresenter.new(attachment))
     end
@@ -261,10 +261,10 @@ module Govspeak
     #
     # This issue is not considered a bug by kramdown: https://github.com/gettalong/kramdown/issues/191
     def render_image(image)
-      id_attr = image.id ? %{ id="attachment_#{image.id}"} : ""
+      id_attr = image.id ? %( id="attachment_#{image.id}") : ''
       lines = []
-      lines << %{<figure#{id_attr} class="image embedded">}
-      lines << %{<div class="img"><img src="#{encode(image.url)}" alt="#{encode(image.alt_text)}"></div>}
+      lines << %(<figure#{id_attr} class="image embedded">)
+      lines << %(<div class="img"><img src="#{encode(image.url)}" alt="#{encode(image.alt_text)}"></div>)
       lines << image.figcaption_html if image.figcaption?
       lines << '</figure>'
       lines.join
@@ -279,11 +279,11 @@ module Govspeak
     wrap_with_div('example', '$E', Govspeak::Document)
     wrap_with_div('call-to-action', '$CTA', Govspeak::Document)
 
-    extension('address', surrounded_by("$A")) { |body|
-      %{\n<div class="address"><div class="adr org fn"><p>\n#{body.sub("\n", '').gsub("\n", '<br />')}\n</p></div></div>\n}
-    }
+    extension('address', surrounded_by('$A')) do |body|
+      %(\n<div class="address"><div class="adr org fn"><p>\n#{body.sub("\n", '').gsub("\n", '<br />')}\n</p></div></div>\n)
+    end
 
-    extension("legislative list", /#{NEW_PARAGRAPH_LOOKBEHIND}\$LegislativeList\s*$(.*?)\$EndLegislativeList/m) do |body|
+    extension('legislative list', /#{NEW_PARAGRAPH_LOOKBEHIND}\$LegislativeList\s*$(.*?)\$EndLegislativeList/m) do |body|
       Govspeak::KramdownOverrides.with_kramdown_ordered_lists_disabled do
         Kramdown::Document.new(body.strip).to_html.tap do |doc|
           doc.gsub!('<ul>', '<ol>')
@@ -293,11 +293,11 @@ module Govspeak
       end
     end
 
-    extension("numbered list", /^[ \t]*((s\d+\.\s.*(?:\n|$))+)/) do |body|
+    extension('numbered list', /^[ \t]*((s\d+\.\s.*(?:\n|$))+)/) do |body|
       body.gsub!(/s(\d+)\.\s(.*)(?:\n|$)/) do
-        "<li>#{Govspeak::Document.new($2.strip).to_html}</li>\n"
+        "<li>#{Govspeak::Document.new(Regexp.last_match(2).strip).to_html}</li>\n"
       end
-      %{<ol class="steps">\n#{body}</ol>}
+      %(<ol class="steps">\n#{body}</ol>)
     end
 
     def self.devolved_options
@@ -320,7 +320,7 @@ module Govspeak
       end
     end
 
-    extension("Priority list", /#{NEW_PARAGRAPH_LOOKBEHIND}\$PriorityList:(\d+)\s*$(.*?)(?:^\s*$|\Z)/m) do |number_to_show, body|
+    extension('Priority list', /#{NEW_PARAGRAPH_LOOKBEHIND}\$PriorityList:(\d+)\s*$(.*?)(?:^\s*$|\Z)/m) do |number_to_show, body|
       number_to_show = number_to_show.to_i
       tagged = 0
       Govspeak::Document.new(body.strip).to_html.gsub(/<li>/) do |match|
@@ -335,7 +335,7 @@ module Govspeak
 
     extension('embed link', /\[embed:link:\s*(.*?)\s*\]/) do |content_id|
       link = links.detect { |l| l[:content_id] == content_id }
-      next "" unless link
+      next '' unless link
 
       if link[:url]
         "[#{link[:title]}](#{link[:url]})"
@@ -346,7 +346,7 @@ module Govspeak
 
     extension('Contact', /\[Contact:\s*(.*?)\s*\]/) do |content_id|
       contact = contacts.detect { |c| c[:content_id] == content_id }
-      next "" unless contact
+      next '' unless contact
 
       renderer = TemplateRenderer.new('contact.html.erb', locale)
       renderer.render(contact: ContactPresenter.new(contact))
@@ -354,24 +354,24 @@ module Govspeak
 
     extension('Image', /#{NEW_PARAGRAPH_LOOKBEHIND}\[Image:\s*(.*?)\s*\]/) do |image_id|
       image = images.detect { |c| c.is_a?(Hash) && c[:id] == image_id }
-      next "" unless image
+      next '' unless image
 
       render_image(ImagePresenter.new(image))
     end
 
     extension('Attachment', /#{NEW_PARAGRAPH_LOOKBEHIND}\[Attachment:\s*(.*?)\s*\]/) do |attachment_id|
-      next "" if attachments.none? { |a| a[:id] == attachment_id }
+      next '' if attachments.none? { |a| a[:id] == attachment_id }
 
-      %{<govspeak-embed-attachment id="#{attachment_id}"></govspeak-embed-attachment>}
+      %(<govspeak-embed-attachment id="#{attachment_id}"></govspeak-embed-attachment>)
     end
 
     extension('AttachmentLink', /\[AttachmentLink:\s*(.*?)\s*\]/) do |attachment_id|
-      next "" if attachments.none? { |a| a[:id] == attachment_id }
+      next '' if attachments.none? { |a| a[:id] == attachment_id }
 
-      %{<govspeak-embed-attachment-link id="#{attachment_id}"></govspeak-embed-attachment-link>}
+      %(<govspeak-embed-attachment-link id="#{attachment_id}"></govspeak-embed-attachment-link>)
     end
 
-  private
+    private
 
     def kramdown_doc
       @kramdown_doc ||= Kramdown::Document.new(preprocess(@source), @options)

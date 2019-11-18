@@ -11,7 +11,7 @@ module Govspeak
     end
 
     def alt_text
-      (attachment.title || "").tr("\n", " ")
+      (attachment.title || '').tr("\n", ' ')
     end
 
     def caption

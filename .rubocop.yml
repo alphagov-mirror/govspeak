@@ -1,6 +1,20 @@
+Metrics/AbcSize:
+  Enabled: false
 Metrics/BlockLength:
   Exclude:
     - '*.gemspec'
     - 'test/**/*'
+Metrics/ClassLength:
+  Enabled: false
+Metrics/LineLength:
+  Enabled: false
+Metrics/MethodLength:
+  Enabled: false
+Style/Documentation:
+  Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
+Style/RedundantFreeze:
+  Enabled: false
 Style/TrivialAccessors:
   IgnoreClassMethods: true

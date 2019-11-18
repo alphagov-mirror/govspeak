@@ -22,22 +22,22 @@ module Govspeak
       if value.present?
         "<span class=\"#{hcard_name}\">#{ERB::Util.html_escape(value)}</span>"
       else
-        ""
+        ''
       end
     end
 
-  private
+    private
 
     def interpolate_address_template
       address = address_template
 
       properties = {
-        title: "fn",
-        street_address: "street-address",
-        locality: "locality",
-        region: "region",
-        postal_code: "postal-code",
-        world_location: "country-name",
+        title: 'fn',
+        street_address: 'street-address',
+        locality: 'locality',
+        region: 'region',
+        postal_code: 'postal-code',
+        world_location: 'country-name'
       }
 
       properties.each do |our_name, hcard_name|

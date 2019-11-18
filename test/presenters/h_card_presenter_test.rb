@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 require 'test_helper'
 require 'ostruct'
 
@@ -8,15 +6,15 @@ class HCardPresenterTest < Minitest::Test
     html.gsub(/^\s+/, '')
   end
 
-  test "renders address in UK format" do
+  test 'renders address in UK format' do
     assert_equal unindent(gb_addr), HCardPresenter.new(addr_fields, 'GB').render
   end
 
-  test "renders address in Spanish format" do
+  test 'renders address in Spanish format' do
     assert_equal unindent(es_addr), HCardPresenter.new(addr_fields, 'ES').render
   end
 
-  test "renders address in Japanese format" do
+  test 'renders address in Japanese format' do
     assert_equal unindent(jp_addr), HCardPresenter.new(addr_fields, 'JP').render
   end
 
@@ -27,7 +25,7 @@ class HCardPresenterTest < Minitest::Test
     assert_equal unindent(gb_format_before), HCardPresenter.address_formats['gb']
   end
 
-  test "blank properties do not render extra line breaks" do
+  test 'blank properties do not render extra line breaks' do
     fields_without_region = addr_fields
     fields_without_region.delete('region')
 
@@ -48,14 +46,14 @@ class HCardPresenterTest < Minitest::Test
     fields = addr_fields
 
     fields['region'] = 'UK & Channel Islands'
-    assert_includes HCardPresenter.new(fields, 'GB').render, "UK &amp; Channel Islands"
+    assert_includes HCardPresenter.new(fields, 'GB').render, 'UK &amp; Channel Islands'
   end
 
-  test "it defaults to UK format" do
+  test 'it defaults to UK format' do
     assert_equal unindent(gb_addr), HCardPresenter.new(addr_fields, 'FUBAR').render
   end
 
-  test "it builds from a Contact" do
+  test 'it builds from a Contact' do
     contact = OpenStruct.new(recipient: 'Recipient',
                              street_address: 'Street',
                              locality: 'Locality',
@@ -68,7 +66,7 @@ class HCardPresenterTest < Minitest::Test
     assert_equal unindent(es_addr), hcard.render
   end
 
-  test "it leaves out the country name when building a GB contact" do
+  test 'it leaves out the country name when building a GB contact' do
     contact = OpenStruct.new(recipient: 'Recipient',
                              street_address: 'Street',
                              locality: 'Locality',
