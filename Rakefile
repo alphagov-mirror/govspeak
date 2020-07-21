@@ -12,4 +12,9 @@ Rake::TestTask.new("test") { |t|
   t.warning = true
 }
 
-task default: [:test]
+desc "Lint Ruby"
+task :lint do
+  sh "bundle exec rubocop --format clang"
+end
+
+task default: %i[test lint]
